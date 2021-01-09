@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Minimal working example</title>
+</head>
+<body>
+    <h1>funcionou</h1>
+    
+    <button onclick="cliquei()">Click me</button>
+    <ul id="events"></ul>
+    <script src="/socket.io/socket.io.js"></script>
+ <script>
+        let cliquei = () =>{
+            const time = Date.now();
+            const socket = io();
+
+socket.on('connect', () => {
+  $events.appendChild(newItem('enviei'));
+  socket.emit('hey',  { time }); // the object will be serialized for you
+  socket.on('hello', (data) => {
+    let obj = JSON.stringify(data.time)
+  $events.appendChild(newItem(obj));
+});
+})
+        }
+
+        const $events = document.getElementById('events');
+
+        const newItem = (content) => {
+          const item = document.createElement('li');
+          item.innerText = content;
+          return item;
+        };
+
+        const socket = io();
+
+        socket.on('connect', () => {
+          $events.appendChild(newItem('conectou'));
+        });
+
+    </script>
+
+</body>
+</html>
