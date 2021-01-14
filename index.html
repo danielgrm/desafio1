@@ -1,45 +1,220 @@
-<!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Minimal working example</title>
+  <meta charset="UTF-8">
+  <title>DanielGRM's answer to Code Challenge</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@600&display=swap" rel="stylesheet">
+ <style>
+   body{
+ margin: 0px;
+ padding: 0px
+   }
+
+ </style>
 </head>
+
 <body>
-    <h1>funcionou</h1>
-    
-    <button onclick="cliquei()">Click me</button>
+      <div style="font-family: 'Source Sans Pro', sans-serif;font-size: 15px;color: black;background: lightgrey; height: 40px;  width: 100%;position: fixed;z-index: 1;top: 0;overflow-x: hidden;padding: 5px;padding-left: 40px">
+        <h1 style ="margin: 0px;padding: 0px">DanielGRM's answer to Code Challenge</h1>
+</div>
+ 
+  <div style="font-family: 'Source Code Pro', monospace;  font-size: 15px;  color: white; padding-left: 40px; background: black; height: 250px;  width: 100%;position: relative;z-index: 5;;overflow-x: hidden; top: 40px">
     <ul id="events"></ul>
-    <script src="/socket.io/socket.io.js"></script>
- <script>
-        let cliquei = () =>{
-            const time = Date.now();
-            const socket = io();
+  </div>
 
-socket.on('connect', () => {
-  $events.appendChild(newItem('enviei'));
-  socket.emit('hey',  { time }); // the object will be serialized for you
-  socket.on('hello', (data) => {
-    let obj = JSON.stringify(data.time)
-  $events.appendChild(newItem(obj));
-});
-})
-        }
+  <div style="font-family: 'Source Sans Pro', sans-serif; color: black; padding-left: 40px; background: white;  width: 100%;position: relative;z-index: 1;;overflow-x: hidden;"></div>
+    <div id="tester" style="width:800px;height:400px;"></div>
+  </div>
 
-        const $events = document.getElementById('events');
+  <div style="margin: 0px;  padding: 10px;padding-left: 40px;  font-family: 'Source Sans Pro', sans-serif;  font-size: 15px;  background: lightgrey; height: 40px;  width: 100%;position: fixed;z-index: 1;bottom: 0;overflow-x: hidden">
+    <button style="color: white; background: blue; border: blue; margin: 0px; padding: 10px;" class="button" onclick="cliquei()">Generate Chart</button>
+</div>
 
-        const newItem = (content) => {
-          const item = document.createElement('li');
-          item.innerText = content;
-          return item;
-        };
 
-        const socket = io();
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var cliquei = () => {
+      let timestamp = Date.now();
+      const socket = io();
+      var type = "start"
+      let select = ['min_response_time', 'max_response_time']
+      let group = ['os', 'browser']
+      var begin = timestamp
+      var end = timestamp + 6000
+      var minxlinuxfirefox = []
+      var minylinuxfirefox = []
+      var maxxlinuxfirefox = []
+      var maxylinuxfirefox = []
 
-        socket.on('connect', () => {
-          $events.appendChild(newItem('conectou'));
+      var minxlinuxchrome = []
+      var minylinuxchrome = []
+      var maxxlinuxchrome = []
+      var maxylinuxchrome = []
+
+      var minxmacosfirefox = []
+      var minymacosfirefox = []
+      var maxxmacosfirefox = []
+      var maxymacosfirefox = []
+
+      var minxmacoschrome = []
+      var minymacoschrome = []
+      var maxxmacoschrome = []
+      var maxymacoschrome = []
+
+      socket.on('connect', () => {
+        socket.emit('start', { type, timestamp, select, group });
+        type = "span"
+        socket.emit('span', { type, timestamp, begin, end });
+        socket.on('res_start', (data) => {
+          let obj = JSON.stringify(data)
+          $events.appendChild(newItem(obj));
+        })
+        socket.on('res_span', (data) => {
+          let obj = JSON.stringify(data)
+          $events.appendChild(newItem(obj));
+        })
+        socket.on('res_data', (data) => {
+          let obj = JSON.stringify(data)
+          $events.appendChild(newItem(obj));
+          if (data.os == "linux" && (data.browser) == "firefox") {
+
+
+            minxlinuxfirefox.push((data.timestamp - begin) / 1000)
+            maxxlinuxfirefox.push((data.timestamp - begin) / 1000)
+            minylinuxfirefox.push(Number.parseFloat(data.min_response_time))
+            maxylinuxfirefox.push(Number.parseFloat(data.max_response_time))
+
+          }
+          if (data.os == "linux" && (data.browser) == "chrome") {
+            minxlinuxchrome.push((data.timestamp - begin) / 1000)
+            maxxlinuxchrome.push((data.timestamp - begin) / 1000)
+            minylinuxchrome.push(Number.parseFloat(data.min_response_time))
+            maxylinuxchrome.push(Number.parseFloat(data.max_response_time))
+          }
+
+          if (data.os == "mac" && (data.browser) == "firefox") {
+            minxmacosfirefox.push((data.timestamp - begin) / 1000)
+            maxxmacosfirefox.push((data.timestamp - begin) / 1000)
+            minymacosfirefox.push(Number.parseFloat(data.min_response_time))
+            maxymacosfirefox.push(Number.parseFloat(data.max_response_time))
+          }
+
+          if (data.os == "mac" && (data.browser) == "chrome") {
+            minxmacoschrome.push((data.timestamp - begin) / 1000)
+            maxxmacoschrome.push((data.timestamp - begin) / 1000)
+            minymacoschrome.push(Number.parseFloat(data.min_response_time))
+            maxymacoschrome.push(Number.parseFloat(data.max_response_time))
+          }
+
+
+
+          var trace1 = {
+            type: 'scatter',
+            name:"Linux Firefox Min. Resp. Time"
+          };
+          trace1["x"] = minxlinuxfirefox
+          trace1["y"] = minylinuxfirefox
+
+          var trace2 = {
+            type: 'scatter',
+            name:"Linux Firefox Max. Resp. Time"
+          };
+          trace2["x"] = maxxlinuxfirefox
+          trace2["y"] = maxylinuxfirefox
+
+          var trace3 = {
+            type: 'scatter',
+            name:"Linux Chrome Min. Resp. Time"
+          };
+          trace3["x"] = minxlinuxchrome
+          trace3["y"] = minylinuxchrome
+
+          var trace4 = {
+            type: 'scatter',
+            name:"Linux Chrome Max. Resp. Time"
+          };
+          trace4["x"] = maxxlinuxchrome
+          trace4["y"] = maxylinuxchrome
+
+          var trace5 = {
+              type: 'scatter',
+              name:"MacOs Firefox Min. Resp. Time"
+            };
+            trace5["x"] = minxmacosfirefox
+            trace5["y"] = minymacosfirefox
+
+            var trace6 = {
+              type: 'scatter',
+              name:"MacOs Firefox Max. Resp. Time"
+            };
+            trace6["x"] = maxxmacosfirefox
+            trace6["y"] = maxymacosfirefox
+
+            var trace7 = {
+              type: 'scatter',
+              name:"MacOs Chrome Min. Resp. Time"
+            };
+            trace7["x"] = minxmacoschrome
+            trace7["y"] = minymacoschrome
+
+
+            var trace8 = {
+              type: 'scatter',
+              name:"MacOs Chrome Max. Resp. Time"
+              
+            };
+            trace8["x"] = maxxmacoschrome
+            trace8["y"] = maxymacoschrome
+
+
+
+
+          var data = [trace1, trace2, trace3, trace4, trace5, trace6, trace7, trace8];
+          var layout = {title: 'Fancy Plot'};
+
+          Plotly.newPlot('tester', data, layout, {editable: false});
+          ////ate aqui
+
+        })
+
+        type = "stop"
+        timestamp = end
+        setTimeout(() => { socket.emit('stop', { type, timestamp }) }, 7000);
+
+
+
+
+        socket.on('res_stop', (data) => {
+          let obj = JSON.stringify(data)
+          $events.appendChild(newItem(obj));
         });
+      })
+    }
 
-    </script>
+    const $events = document.getElementById('events');
+
+    const newItem = (content) => {
+      const item = document.createElement('li');
+      item.innerText = content;
+      return item;
+    };
+
+    const socket = io();
+
+    socket.on('connect', () => {
+      $events.appendChild(newItem('connected'));
+    });
+
+
+
+  </script>
+
+
 
 </body>
 </html>
